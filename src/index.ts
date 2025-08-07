@@ -3,6 +3,7 @@ import multer from 'multer';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 
+import pdfParse from 'pdf-parse';
 const app = express();
 const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
 
@@ -21,8 +22,15 @@ app.post('/api/vectorize', upload.single('file'), async (req, res) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "embedding-001"});
-    const fileContent = fs.readFileSync(req.file.path, 'utf-8');
+    const model = genAI.getGenerativeModel({ model: 'embedding-001' });
+    let fileContent: string;
+
+    if (req.file.mimetype === 'application/pdf') {
+      const data = await pdfParse(fs.readFileSync(req.file.path));
+      fileContent = data.text;
+    } else {
+      fileContent = fs.readFileSync(req.file.path, 'utf-8');
+    }
     const result = await model.embedContent(fileContent);
     fs.unlinkSync(req.file.path); // Clean up the uploaded file
     res.json(result.embedding.values);
