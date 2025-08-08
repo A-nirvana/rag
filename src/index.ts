@@ -3,12 +3,15 @@ import multer from 'multer';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 
+import cors from 'cors';
 import pdfParse from 'pdf-parse';
 const app = express();
 const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
 
 // Initialize the Generative AI client (replace with your API key or environment variable)
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
+
+app.use(cors());
 
 
 app.get('/', (req, res) => {
